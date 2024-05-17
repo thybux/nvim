@@ -108,15 +108,43 @@ vim.api.nvim_set_keymap('n', '<leader>e', ':Neotree toggle<CR>', { noremap = tru
 -- vim.cmd("colorscheme carbonfox")
 --Activer les couleurs de terminalvim
 -- vim.opt.termguicolors = true
+--
+
+-- pour les espace de tabulation
 vim.opt.tabstop = 4     -- Nombre de colonnes de texte qu'une tabulation représente
 vim.opt.shiftwidth = 4  -- Nombre de colonnes de texte à utiliser pour l'indentation automatique
 vim.opt.expandtab = true -- Convertit les tabulations en espaces
+
+
+-- le debug en cas de crash de nvim
 vim.lsp.set_log_level("debug")
 vim.g.gruvbox_contrast_dark = 'hard'
+
+
+-- indentation 
 vim.api.nvim_create_augroup("AutoIndent", { clear = true })
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--     group = "AutoIndent",
+--     pattern = "*",
+--     command = "normal gg=G"
+-- })
+
+-- pour les nombre de lignes
+vim.opt.number = true
+vim.opt.relativenumber = true
+
+-- enregistrement san remonter en haut
 vim.api.nvim_create_autocmd("BufWritePre", {
-    group = "AutoIndent",
     pattern = "*",
-    command = "normal gg=G"
+    callback = function()
+        vim.w.save_cursor = vim.api.nvim_win_get_cursor(0)
+    end
+})
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+    pattern = "*",
+    callback = function()
+        vim.api.nvim_win_set_cursor(0, vim.w.save_cursor)
+    end
 })
 
