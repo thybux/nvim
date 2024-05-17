@@ -5,8 +5,8 @@ vim.g.mapleader = ' '
 -- Installer Packer si nécessaire
 local install_path = vim.fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-  vim.fn.execute('!git clone --depth 1 https://github.com/wbthomason/packer.nvim ' .. install_path)
-  vim.cmd 'packadd packer.nvim'
+    vim.fn.execute('!git clone --depth 1 https://github.com/wbthomason/packer.nvim ' .. install_path)
+    vim.cmd 'packadd packer.nvim'
 end
 
 -- Utilisation de Packer pour gérer les plugins
@@ -17,32 +17,51 @@ require('packer').startup(function(use)
         'neovim/nvim-lspconfig', -- Configuration des LSPs
     }
     use {
-    'williamboman/mason.nvim',
-    config = function()
-      require('mason').setup()
-    end
-  }
-  use {
+        'williamboman/mason.nvim',
+        config = function()
+            require('mason').setup()
+        end
+    }
+    use {
         'nvim-treesitter/nvim-treesitter',
         run = ':TSUpdate'
     }
-  use {
-    'williamboman/mason-lspconfig.nvim',
-    config = function()
-      require('mason-lspconfig').setup({
-        ensure_installed = { "pyright", "tsserver" }
-      })
-    end
-  }
-  use {
-  "nvim-neo-tree/neo-tree.nvim",
-    branch = "v3.x",
-    requires = { 
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-      "MunifTanjim/nui.nvim",
+    use {
+        'williamboman/mason-lspconfig.nvim',
+        config = function()
+            require('mason-lspconfig').setup({
+                ensure_installed = { "pyright", "tsserver" }
+            })
+        end
     }
-  }
+    use {
+        'MunifTanjim/prettier.nvim',
+        config = function()
+            require('prettier').setup({
+                bin = 'prettier',  -- Assurez-vous que prettier est installé globalement
+                filetypes = {
+                    'css',
+                    'javascript',
+                    'json',
+                    'lua',
+                    'markdown',
+                    'php',
+                    'typescript',
+                    'yaml'
+                }
+            })
+        end
+    }
+    use {
+        "nvim-neo-tree/neo-tree.nvim",
+        branch = "v3.x",
+        requires = { 
+            "nvim-lua/plenary.nvim",
+            "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+            "MunifTanjim/nui.nvim",
+        }
+    }
+    use "lukas-reineke/indent-blankline.nvim"
     use 'hrsh7th/nvim-cmp'        -- Moteur de complétion pour Neovim
     use 'hrsh7th/cmp-nvim-lsp'    -- Intégration de nvim-cmp avec les LSP
     use 'hrsh7th/cmp-buffer'      -- Complétion à partir du contenu du buffer
@@ -71,6 +90,7 @@ require('packer').startup(function(use)
             }
         end
     }
+
 end)
 
 -- Chargement des configurations de plugins depuis des fichiers séparés
@@ -78,7 +98,7 @@ require('plugins.autopairs')
 require('plugins.cmp')
 require('plugins.lspconfig')
 require('plugins.treesitter')
-
+require('plugins.ibl')
 -- Configuration de Neo-tree et ajout d'un raccourci clavier pour l'ouvrir
 vim.api.nvim_set_keymap('n', '<leader>e', ':Neotree toggle<CR>', { noremap = true, silent = true })
 
@@ -88,5 +108,15 @@ vim.api.nvim_set_keymap('n', '<leader>e', ':Neotree toggle<CR>', { noremap = tru
 -- vim.cmd("colorscheme carbonfox")
 --Activer les couleurs de terminalvim
 -- vim.opt.termguicolors = true
+vim.opt.tabstop = 4     -- Nombre de colonnes de texte qu'une tabulation représente
+vim.opt.shiftwidth = 4  -- Nombre de colonnes de texte à utiliser pour l'indentation automatique
+vim.opt.expandtab = true -- Convertit les tabulations en espaces
 vim.lsp.set_log_level("debug")
 vim.g.gruvbox_contrast_dark = 'hard'
+vim.api.nvim_create_augroup("AutoIndent", { clear = true })
+vim.api.nvim_create_autocmd("BufWritePre", {
+    group = "AutoIndent",
+    pattern = "*",
+    command = "normal gg=G"
+})
+
