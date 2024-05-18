@@ -61,7 +61,7 @@ require('packer').startup(function(use)
             "MunifTanjim/nui.nvim",
         }
     }
-    use "lukas-reineke/indent-blankline.nvim"
+ --   use "lukas-reineke/indent-blankline.nvim"
     use 'hrsh7th/nvim-cmp'        -- Moteur de complétion pour Neovim
     use 'hrsh7th/cmp-nvim-lsp'    -- Intégration de nvim-cmp avec les LSP
     use 'hrsh7th/cmp-buffer'      -- Complétion à partir du contenu du buffer
@@ -98,7 +98,7 @@ require('plugins.autopairs')
 require('plugins.cmp')
 require('plugins.lspconfig')
 require('plugins.treesitter')
-require('plugins.ibl')
+--require('plugins.ibl')
 -- Configuration de Neo-tree et ajout d'un raccourci clavier pour l'ouvrir
 vim.api.nvim_set_keymap('n', '<leader>e', ':Neotree toggle<CR>', { noremap = true, silent = true })
 
@@ -147,4 +147,5 @@ vim.api.nvim_create_autocmd("BufWritePost", {
         vim.api.nvim_win_set_cursor(0, vim.w.save_cursor)
     end
 })
+
 
