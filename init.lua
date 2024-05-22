@@ -3,7 +3,6 @@
 vim.api.nvim_set_keymap('i', '<M-S-b>', '[', {noremap = true, silent = true})
 
 
-
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
 

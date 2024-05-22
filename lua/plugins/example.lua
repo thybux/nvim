@@ -10,16 +10,17 @@ if true then return {} end
 -- * override the configuration of LazyVim plugins
 return {
 
-  -- add gruvbox
-  { "ellisonleao/gruvbox.nvim" },
+  --{ "ellisonleao/gruvbox.nvim", enabled = false },
+  { "LazyVim/LazyVim", opts = { colorscheme = "gruvbox" } },
 
-  -- Configure LazyVim to load gruvbox
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "gruvbox",
+      colorscheme = function() end, -- utiliser la fonction vide pour désactiver le thème
     },
   },
+
+  { "folke/tokyonight.nvim", enabled = false },
 
   -- change trouble config
   {
@@ -174,7 +175,7 @@ return {
   },
 
   -- use mini.starter instead of alpha
-  { import = "lazyvim.plugins.extras.ui.mini-starter" },
+  -- { import = "lazyvim.plugins.extras.ui.mini-starter" },
 
   -- add jsonls and schemastore packages, and setup treesitter for json, json5 and jsonc
   { import = "lazyvim.plugins.extras.lang.json" },
