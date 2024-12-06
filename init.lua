@@ -1,5 +1,7 @@
 -- Définir la touche leader
 vim.g.mapleader = ' '
+vim.opt.termguicolors = true
+vim.opt.cmdheight = 3
 
 -- Chemin pour lazy.nvim
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
@@ -25,6 +27,13 @@ require('lazy').setup({
       require('mason').setup()
     end,
   },
+  {
+    "rcarriga/nvim-notify",
+    config = function()
+        vim.notify = require("notify")
+    end,
+},
+
   -- mason-lspconfig pour une intégration facile avec lspconfig
   {
     'williamboman/mason-lspconfig.nvim',
@@ -44,12 +53,17 @@ require('lazy').setup({
     end,
   },
 	{
-  'folke/tokyonight.nvim',
-  config = function()
-    vim.cmd('colorscheme tokyonight')
-  end,
-},
-
+    'Mofiqul/dracula.nvim',
+    config = function()
+      require('dracula').setup({
+        -- Activer les options
+        transparent_bg = false, -- Désactiver la transparence (fond opaque)
+        italic_comment = true,  -- Commentaires en italique (facultatif)
+      })
+      vim.cmd("colorscheme dracula") -- Applique le thème
+    end,
+  },
+  
   -- Configuration des LSP
   {
     'neovim/nvim-lspconfig',
