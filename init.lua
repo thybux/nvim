@@ -2,7 +2,8 @@
 vim.g.mapleader = ' '
 vim.opt.termguicolors = true
 vim.opt.cmdheight = 3
-
+-- vim.opt.number = true
+vim.opt.relativenumber = true
 -- Chemin pour lazy.nvim
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 
