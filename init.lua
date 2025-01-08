@@ -19,6 +19,9 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- chrager l'ui
+require('ui_colors')
+
 -- Configuration des plugins avec lazy.nvim
 require('lazy').setup({
   -- Mason pour gérer les LSP
@@ -53,7 +56,7 @@ require('lazy').setup({
       })
     end,
   },
-	{
+--[[{
     'Mofiqul/dracula.nvim',
     config = function()
       require('dracula').setup({
@@ -63,7 +66,7 @@ require('lazy').setup({
       })
       vim.cmd("colorscheme dracula") -- Applique le thème
     end,
-  },
+  },--]]
   
   -- Configuration des LSP
   {
@@ -243,7 +246,6 @@ require('lazy').setup({
   },
 })
 
--- Configurations supplémentaires
 
 -- Ouvrir nvim-tree avec <leader>e
 vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
@@ -253,4 +255,20 @@ vim.keymap.set('n', '<leader>t', ':ToggleTerm<CR>', { noremap = true, silent = t
 
 -- Lancer le jeu vim-be-good avec <leader>g
 vim.keymap.set('n', '<leader>g', ':VimBeGood<CR>', { noremap = true, silent = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    local python_path = get_python_path()
+    require("lspconfig").pyright.setup({
+      settings = {
+        python = {
+          pythonPath = python_path,
+        },
+      },
+    })
+  end,
+})
+
+vim.opt.guifont = "JetBrains Mono:h14"
 
