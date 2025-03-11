@@ -61,29 +61,69 @@ require("lazy").setup({
     },
     config = function()
       require("mason-lspconfig").setup()
+
+      local enabled_lsp = {
+        intelephense = false,
+        tsserver = false,
+        lua_ls = false,
+        black = false,
+        ["docker-compose-language-service"] = false,
+        ["dockerfile-language-server"] = false,
+        rust_analyzer = true,
+      }
+
       require("mason-lspconfig").setup_handlers({
         function(server_name)
-          require("lspconfig")[server_name].setup({
-            capabilities = require("cmp_nvim_lsp").default_capabilities(),
-          })
+          if enabled_lsp[server_name] then
+            require("lspconfig")[server_name].setup({})
+          end
         end,
       })
     end,
   },
-  {
+  --[[{
     "Mofiqul/dracula.nvim",
     config = function()
       require("dracula").setup({
         -- Activer les options
-        transparent_bg = false,
+        transparent_bg = true,
         italic_comment = true,
       })
       vim.cmd("colorscheme dracula") -- Applique le thème
     end,
+  },]]--
+  {
+    "rebelot/kanagawa.nvim",
+    config = function()
+        require('kanagawa').setup({
+        compile = false,             -- enable compiling the colorscheme
+        undercurl = true,            -- enable undercurls
+        commentStyle = { italic = true },
+        functionStyle = {},
+        keywordStyle = { italic = true},
+        statementStyle = { bold = true },
+        typeStyle = {},
+        transparent = false,         -- do not set background color
+        dimInactive = false,         -- dim inactive window `:h hl-NormalNC`
+        terminalColors = true,       -- define vim.g.terminal_color_{0,17}
+        colors = {                   -- add/modify theme and palette colors
+            palette = {},
+            theme = "wave",
+            background = {
+              dark = "wave",
+          }
+        },
+        overrides = function(colors) -- add/modify highlights
+            return {}
+        end,
+        theme = "wave",              -- Load "wave" theme when 'background' option is not set
+        background = {               -- map the value of 'background' option to a theme
+            dark = "dragon",           -- try "dragon" !
+            light = "lotus"
+        },
+    })
+    end,
   },
-  --
-
-  -- Configuration des LSP
   {
     "neovim/nvim-lspconfig",
   },
@@ -155,12 +195,12 @@ require("lazy").setup({
   {
     "hrsh7th/nvim-cmp",
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",      -- Source pour LSP
-      "hrsh7th/cmp-buffer",        -- Source pour buffer actuel
-      "hrsh7th/cmp-path",          -- Source pour les chemins de fichiers
-      "hrsh7th/cmp-cmdline",       -- Source pour la ligne de commande
-      "L3MON4D3/LuaSnip",          -- Moteur de snippets
-      "saadparwaiz1/cmp_luasnip",  -- Source pour LuaSnip
+      "hrsh7th/cmp-nvim-lsp",         -- Source pour LSP
+      "hrsh7th/cmp-buffer",           -- Source pour buffer actuel
+      "hrsh7th/cmp-path",             -- Source pour les chemins de fichiers
+      "hrsh7th/cmp-cmdline",          -- Source pour la ligne de commande
+      "L3MON4D3/LuaSnip",             -- Moteur de snippets
+      "saadparwaiz1/cmp_luasnip",     -- Source pour LuaSnip
       "rafamadriz/friendly-snippets", -- Snippets prédéfinis
     },
     config = function()
@@ -289,5 +329,5 @@ local lspconfig = require("lspconfig")
 lspconfig.emmet_ls.setup({
   filetypes = { "html", "css", "tpl" },
 })
-
+vim.cmd("colorscheme kanagawa")
 vim.opt.guifont = "JetBrains Mono:h14"
