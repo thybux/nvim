@@ -27,6 +27,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- chrager l'ui
 -- require("ui_colors")
+-- require("colors")
 
 vim.filetype.add({
   extension = {
@@ -34,8 +35,12 @@ vim.filetype.add({
   },
 })
 
+
 -- Configuration des plugins avec lazy.nvim
 require("lazy").setup({
+  {
+		'navarasu/onedark.nvim',
+	},
   -- Mason pour gérer les LSP
   {
     "williamboman/mason.nvim",
@@ -63,13 +68,26 @@ require("lazy").setup({
       require("mason-lspconfig").setup()
 
       local enabled_lsp = {
-        intelephense = false,
+        
+        -- config pour PHP
+        intelephense = true,
         tsserver = false,
+
+
+        -- config pour lua
         lua_ls = false,
+
+
+        -- config pour python
         black = false,
+        pyright = false,
+
+        -- config pour docker
         ["docker-compose-language-service"] = false,
         ["dockerfile-language-server"] = false,
-        rust_analyzer = true,
+
+        -- config pour rust
+        rust_analyzer = false,
       }
 
       require("mason-lspconfig").setup_handlers({
@@ -81,18 +99,7 @@ require("lazy").setup({
       })
     end,
   },
-  --[[{
-    "Mofiqul/dracula.nvim",
-    config = function()
-      require("dracula").setup({
-        -- Activer les options
-        transparent_bg = true,
-        italic_comment = true,
-      })
-      vim.cmd("colorscheme dracula") -- Applique le thème
-    end,
-  },]]--
-  {
+ {
     "rebelot/kanagawa.nvim",
     config = function()
         require('kanagawa').setup({
@@ -103,7 +110,7 @@ require("lazy").setup({
         keywordStyle = { italic = true},
         statementStyle = { bold = true },
         typeStyle = {},
-        transparent = false,         -- do not set background color
+        transparent = true,         -- do not set background color
         dimInactive = false,         -- dim inactive window `:h hl-NormalNC`
         terminalColors = true,       -- define vim.g.terminal_color_{0,17}
         colors = {                   -- add/modify theme and palette colors
@@ -329,5 +336,6 @@ local lspconfig = require("lspconfig")
 lspconfig.emmet_ls.setup({
   filetypes = { "html", "css", "tpl" },
 })
-vim.cmd("colorscheme kanagawa")
-vim.opt.guifont = "JetBrains Mono:h14"
+
+vim.cmd("colorscheme oneDark")
+vim.opt.guifont = "JetBrainsMono Nerd Font:h12"
