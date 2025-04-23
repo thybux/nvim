@@ -66,6 +66,9 @@ require("lazy").setup({
     },
     config = true,
   },
+  {
+    "github/copilot.vim",
+  },
    {
     "neovim/nvim-lspconfig",
   },
