@@ -58,16 +58,11 @@ require("lazy").setup({
       require("mason").setup()
     end,
   },
-  {
-    'Exafunction/codeium.nvim',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'hrsh7th/nvim-cmp',
-    },
-    config = true,
+    {
+    "github/copilot.vim",
   },
   {
-    "github/copilot.vim",
+    'ojroques/vim-oscyank',
   },
    {
     "neovim/nvim-lspconfig",
@@ -367,3 +362,8 @@ lspconfig.emmet_ls.setup({
 
 -- vim.cmd("colorscheme oneDark")
 -- vim.opt.guifont = "JetBrainsMono Nerd Font:h12"
+
+-- raccourci pour faire le copier coller 
+vim.keymap.set('n', '<leader>c', '<Plug>OSCYankOperator')
+vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
+vim.keymap.set('v', '<leader>c', '<Plug>OSCYankVisual')
