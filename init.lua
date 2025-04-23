@@ -41,6 +41,16 @@ require("lazy").setup({
   {
 		'navarasu/onedark.nvim',
 	},
+  {
+    "nickkadutskyi/jb.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {},
+    config = function()
+        -- require("jb").setup({transparent = true})
+        vim.cmd("colorscheme jb")
+    end,
+  },
   -- Mason pour gérer les LSP
   {
     "williamboman/mason.nvim",
@@ -49,6 +59,14 @@ require("lazy").setup({
     end,
   },
   {
+    'Exafunction/codeium.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'hrsh7th/nvim-cmp',
+    },
+    config = true,
+  },
+   {
     "neovim/nvim-lspconfig",
   },
   {
@@ -70,8 +88,12 @@ require("lazy").setup({
       local enabled_lsp = {
         
         -- config pour PHP
-        intelephense = true,
-        tsserver = false,
+        intelephense = false,
+
+        -- config typescritp
+        ts_ls = true,
+        prettier = true,
+        
 
 
         -- config pour lua
@@ -87,7 +109,10 @@ require("lazy").setup({
         ["dockerfile-language-server"] = false,
 
         -- config pour rust
-        rust_analyzer = false,
+        rust_analyzer = true,
+
+        -- cobol
+        cobol_ls = false,
       }
 
       require("mason-lspconfig").setup_handlers({
@@ -337,5 +362,5 @@ lspconfig.emmet_ls.setup({
   filetypes = { "html", "css", "tpl" },
 })
 
-vim.cmd("colorscheme oneDark")
-vim.opt.guifont = "JetBrainsMono Nerd Font:h12"
+-- vim.cmd("colorscheme oneDark")
+-- vim.opt.guifont = "JetBrainsMono Nerd Font:h12"
