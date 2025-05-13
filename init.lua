@@ -39,19 +39,19 @@ vim.filetype.add({
 -- Configuration des plugins avec lazy.nvim
 require("lazy").setup({
   {
-		'navarasu/onedark.nvim',
-	},
-  {
     "nickkadutskyi/jb.nvim",
     lazy = false,
     priority = 1000,
     opts = {},
     config = function()
-        -- require("jb").setup({transparent = true})
+        require("jb").setup({transparent = true})
         vim.cmd("colorscheme jb")
     end,
   },
-  -- Mason pour gérer les LSP
+  {
+		'navarasu/onedark.nvim',
+	},
+    -- Mason pour gérer les LSP
   {
     "williamboman/mason.nvim",
     config = function()
@@ -83,34 +83,27 @@ require("lazy").setup({
     config = function()
       require("mason-lspconfig").setup()
 
+     
       local enabled_lsp = {
-        
-        -- config pour PHP
-        intelephense = false,
+          -- Serveurs déjà dans votre configuration
+          intelephense = false,
+          ts_ls = true,
+          prettier = true,
+          lua_ls = false,
+          black = false,
+          pyright = false,
+          ["docker-compose-language-service"] = false,
+          ["dockerfile-language-server"] = false,
+          rust_analyzer = false,
+          cobol_ls = false,
 
-        -- config typescritp
-        ts_ls = true,
-        prettier = true,
-        
-
-
-        -- config pour lua
-        lua_ls = false,
-
-
-        -- config pour python
-        black = false,
-        pyright = false,
-
-        -- config pour docker
-        ["docker-compose-language-service"] = false,
-        ["dockerfile-language-server"] = false,
-
-        -- config pour rust
-        rust_analyzer = true,
-
-        -- cobol
-        cobol_ls = false,
+          -- Ajouter ou activer ces serveurs pour Node.js
+          eslint = true,              -- Détection d'erreurs JavaScript
+          jsonls = true,              -- Pour les fichiers JSON
+          html = true,                -- Si vous travaillez avec HTML
+          cssls = true,               -- Si vous travaillez avec CSS
+          tailwindcss = false,        -- Activez si vous utilisez Tailwind CSS
+          emmet_ls = false,           -- Activez si vous utilisez beaucoup de HTML/CSS
       }
 
       require("mason-lspconfig").setup_handlers({
@@ -367,3 +360,23 @@ lspconfig.emmet_ls.setup({
 vim.keymap.set('n', '<leader>c', '<Plug>OSCYankOperator')
 vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
 vim.keymap.set('v', '<leader>c', '<Plug>OSCYankVisual')
+
+
+-- fonction pour passer d'un fenetre a une autre dans le sens horaire
+vim.cmd([[
+function! ClockwiseNavigation()
+  let l:current_win = winnr()
+  let l:max_win = winnr('$')
+  
+  if l:current_win == l:max_win
+    " Si on est dans la dernière fenêtre, revenir à la première
+    execute "1wincmd w"
+  else
+    " Sinon, aller à la fenêtre suivante
+    execute "wincmd w"
+  endif
+endfunction
+]])
+
+-- Mappez leader + tab à la fonction
+vim.api.nvim_set_keymap('n', '<Leader><Tab>', ':call ClockwiseNavigation()<CR>', { noremap = true, silent = true })
