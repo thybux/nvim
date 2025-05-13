@@ -379,4 +379,9 @@ endfunction
 ]])
 
 -- Mappez leader + tab à la fonction
-vim.api.nvim_set_keymap('n', '<Leader><Tab>', ':call ClockwiseNavigation()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader><Tab>', ':call ClockwiseNavigation()<CR>', { noremap = true, silent = true }) 
+
+-- Meilleure expérience de défilement sur macOS
+vim.opt.scrolloff = 8       -- Garde 8 lignes visibles au-dessus/en-dessous du curseur
+vim.opt.sidescrolloff = 8   -- Garde 8 colonnes visibles à gauche/droite du curseur
+vim.opt.smoothscroll = true -- Défilement doux (Neovim 0.10+)
