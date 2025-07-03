@@ -1,5 +1,5 @@
 return {
-  "Exafunction/codeium.nvim",  -- ⚠️ Attention: .nvim cette fois (pas .vim)
+  "Exafunction/codeium.nvim",
   dependencies = {
     "nvim-lua/plenary.nvim",
     "hrsh7th/nvim-cmp",
