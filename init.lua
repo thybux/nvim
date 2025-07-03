@@ -24,6 +24,10 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+
+-- require('lsp-manager')
+
+
 -- Plugins
 require("lazy").setup({
   {
@@ -35,6 +39,38 @@ require("lazy").setup({
       vim.cmd("colorscheme jb")
     end
   },
+  {
+    "amitds1997/remote-nvim.nvim",
+    version = "*",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-telescope/telescope.nvim",
+    },
+    config = function()
+      local status, remote_nvim = pcall(require, "remote-nvim")
+      if status then
+        print("remote_nvim loaded successfully")
+        remote_nvim.setup()
+      else
+        print("remote_nvim failed to load", remote_nvim)
+      end
+    end,
+  },
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    version = "v2", -- Spécifier la version 2
+    config = function()
+      require("indent_blankline").setup({
+        show_current_context = true,
+        show_current_context_start = true,
+      })
+    end,
+  },
+
+
+
+  -- Remplace toute ta section Mason/LSP par ceci (SANS mason-lspconfig) :
 
   {
     "williamboman/mason.nvim",
@@ -45,6 +81,57 @@ require("lazy").setup({
   },
 
   { "neovim/nvim-lspconfig",    lazy = false },
+
+  -- Configuration LSP directe (sans mason-lspconfig)
+  {
+    "neovim/nvim-lspconfig",
+    config = function()
+      local lspconfig = require("lspconfig")
+
+      -- Rust
+      lspconfig.rust_analyzer.setup({
+        settings = {
+          ['rust-analyzer'] = {
+            cargo = { allFeatures = true },
+            checkOnSave = { command = 'clippy' },
+          }
+        }
+      })
+
+      -- TypeScript
+      lspconfig.ts_ls.setup({})
+
+      -- Lua
+      lspconfig.lua_ls.setup({
+        settings = {
+          Lua = {
+            runtime = { version = 'LuaJIT' },
+            diagnostics = { globals = { 'vim' } },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+            telemetry = { enable = false },
+          }
+        }
+      })
+
+      -- HTML, CSS, JSON, etc.
+      lspconfig.html.setup({})
+      lspconfig.cssls.setup({})
+      lspconfig.jsonls.setup({})
+      lspconfig.pyright.setup({})
+      lspconfig.eslint.setup({})
+      lspconfig.emmet_ls.setup({
+        filetypes = { "html", "css", "tpl" }
+      })
+
+      print("✅ LSP configurés directement")
+    end
+  },
+
+
+
 
   {
     "hrsh7th/nvim-cmp",
@@ -174,6 +261,21 @@ require("lazy").setup({
       })
     end
   },
+  {
+    "github/copilot.vim",
+  },
+
+  {
+    "windwp/nvim-autopairs",
+    config = function()
+      require("nvim-autopairs").setup({})
+      -- Intégration avec nvim-cmp
+      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+      local cmp = require("cmp")
+      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+    end,
+  },
+
 
   {
     "norcalli/nvim-colorizer.lua",
@@ -213,23 +315,3 @@ endfunction
 ]])
 
 vim.api.nvim_set_keymap('n', '<Leader><Tab>', ':call ClockwiseNavigation()<CR>', { noremap = true, silent = true })
-
--- Config LSP
-local lspconfig = require("lspconfig")
-
--- Configuration individuelle des serveurs LSP
-lspconfig.lua_ls.setup({})
-lspconfig.ts_ls.setup({})
-lspconfig.html.setup({})
-lspconfig.cssls.setup({})
-lspconfig.jsonls.setup({})
-lspconfig.eslint.setup({})
-lspconfig.emmet_ls.setup({ filetypes = { "html", "css", "tpl" } })
-
-vim.api.nvim_create_autocmd("UIEnter", {
-  callback = function()
-    for _, server in ipairs({ "ts_ls", "eslint", "jsonls", "html", "cssls", "emmet_ls" }) do
-      lspconfig[server].setup({})
-    end
-  end
-})
