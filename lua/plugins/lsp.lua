@@ -1,254 +1,200 @@
--- =============================================================================
--- ~/.config/nvim/lua/plugins/lsp.lua
--- Configuration LSP complète et corrigée selon la documentation officielle
--- =============================================================================
+-- ===================================================================
+-- CONFIGURATION LSP SIMPLE - COMPATIBLE AVEC MASON
+-- Utilise les serveurs installés via Mason
+-- ===================================================================
 
 return {
   "neovim/nvim-lspconfig",
   dependencies = {
-    "williamboman/mason.nvim",
-    "williamboman/mason-lspconfig.nvim",
-    "hrsh7th/cmp-nvim-lsp",
+    { "williamboman/mason.nvim" },
+    { "hrsh7th/cmp-nvim-lsp" },
   },
   config = function()
     local lspconfig = require("lspconfig")
-    local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-    -- Configuration Mason-lspconfig
-    require("mason-lspconfig").setup({
-      ensure_installed = {
-        "lua_ls", -- Lua
-        "pyright", -- Python
-        "intelephense", -- PHP
-      },
-      -- Les LSP dans ensure_installed s'installent automatiquement
-    })
-
-    -- Configuration des handlers pour chaque LSP
-    require("mason-lspconfig").setup_handlers({
-      -- Handler par défaut pour tous les LSP
-      function(server_name)
-        lspconfig[server_name].setup({
-          capabilities = capabilities,
-        })
-      end,
-
-      -- Configuration spécifique pour Lua
-      ["lua_ls"] = function()
-        lspconfig.lua_ls.setup({
-          capabilities = capabilities,
-          settings = {
-            Lua = {
-              runtime = {
-                version = "LuaJIT",
-              },
-              diagnostics = {
-                globals = { "vim" },
-              },
-              workspace = {
-                library = vim.api.nvim_get_runtime_file("", true),
-                checkThirdParty = false,
-              },
-              telemetry = {
-                enable = false,
-              },
-            },
-          },
-        })
-      end,
-
-      -- Configuration spécifique pour PHP (Intelephense)
-      ["intelephense"] = function()
-        lspconfig.intelephense.setup({
-          capabilities = capabilities,
-          settings = {
-            intelephense = {
-              files = {
-                maxSize = 5000000,
-                associations = { "*.php", "*.phtml" },
-                exclude = {
-                  "**/.git/**",
-                  "**/node_modules/**",
-                  "**/vendor/**/{Tests,tests}/**",
-                  "**/.history/**",
-                  "**/storage/**",
-                  "**/bootstrap/cache/**",
-                },
-              },
-              environment = {
-                includePaths = { "vendor/" },
-              },
-              completion = {
-                insertUseDeclaration = true,
-                fullyQualifyGlobalConstantsAndFunctions = false,
-                triggerParameterHints = true,
-                maxItems = 100,
-              },
-              format = {
-                enable = true,
-              },
-              diagnostics = {
-                enable = true,
-                run = "onType",
-                embeddedLanguages = true,
-              },
-            },
-          },
-          on_attach = function(client, bufnr)
-            print("🐘 PHP LSP (Intelephense) attaché au fichier " .. vim.fn.expand("%:t"))
-
-            -- Keymaps spécifiques PHP
-            local opts = { buffer = bufnr, silent = true }
-            vim.keymap.set("n", "<leader>pu", function()
-              vim.lsp.buf.code_action({
-                filter = function(action)
-                  return action.title:match("Import") or action.title:match("use")
-                end,
-                apply = true,
-              })
-            end, opts)
-          end,
-        })
-      end,
-
-      -- Configuration spécifique pour Python
-      ["pyright"] = function()
-        lspconfig.pyright.setup({
-          capabilities = capabilities,
-          settings = {
-            python = {
-              analysis = {
-                autoSearchPaths = true,
-                diagnosticMode = "workspace",
-                useLibraryCodeForTypes = true,
-                typeCheckingMode = "basic",
-              },
-            },
-          },
-        })
-      end,
-    })
-
-    -- Keybindings LSP généraux
-    vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-      callback = function(ev)
-        -- Enable completion triggered by <c-x><c-o>
-        vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-
-        local opts = { buffer = ev.buf, silent = true }
-
-        -- Navigation
-        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-        vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-        vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
-
-        -- Documentation
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-        vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
-
-        -- Workspace
-        vim.keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
-        vim.keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
-        vim.keymap.set("n", "<leader>wl", function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, opts)
-
-        -- Édition
-        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
-        vim.keymap.set("n", "<leader>f", function()
-          vim.lsp.buf.format({ async = true })
-        end, opts)
-
-        -- Diagnostics
-        vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-        vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-        vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
-        vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, opts)
-
-        -- Refresh CodeLens
-        if vim.lsp.buf.code_lens then
-          vim.keymap.set("n", "<leader>cl", vim.lsp.buf.code_lens, opts)
-        end
-
-        print("🔧 LSP " .. ev.data.client_id .. " attaché au buffer " .. ev.buf)
-      end,
-    })
-
-    -- Configuration des diagnostics
-    vim.diagnostic.config({
-      virtual_text = {
-        enabled = true,
-        source = "if_many",
-        prefix = "●",
-        -- Only show virtual text for errors
-        severity = vim.diagnostic.severity.ERROR,
-      },
-      signs = {
-        text = {
-          [vim.diagnostic.severity.ERROR] = "✗",
-          [vim.diagnostic.severity.WARN] = "⚠",
-          [vim.diagnostic.severity.INFO] = "ℹ",
-          [vim.diagnostic.severity.HINT] = "💡",
-        },
-      },
-      underline = true,
-      update_in_insert = false,
-      severity_sort = true,
-      float = {
-        focusable = false,
-        style = "minimal",
-        border = "rounded",
-        source = "always",
-        header = "",
-        prefix = "",
-        format = function(diagnostic)
-          return string.format("%s (%s)", diagnostic.message, diagnostic.source)
-        end,
-      },
-    })
-
-    -- LSP UI improvements
-    local signs = {
-      Error = "✗",
-      Warn = "⚠",
-      Info = "ℹ",
-      Hint = "💡",
+    -- ===================================================================
+    -- CONFIGURATION - ACTIVEZ/DÉSACTIVEZ AVEC TRUE/FALSE
+    -- ===================================================================
+    local enable_servers = {
+      typescript = true, -- typescript-language-server
+      php = true, -- intelephense
+      rust = true, -- rust-analyzer
+      python = true, -- pyright
+      lua = true, -- lua-language-server
     }
 
+    -- ===================================================================
+    -- SETUP MASON POUR UTILISER LES SERVEURS INSTALLÉS
+    -- ===================================================================
+    require("mason").setup({
+      ui = {
+        border = "rounded",
+      },
+    })
+
+    -- ===================================================================
+    -- CAPACITÉS POUR NVIM-CMP
+    -- ===================================================================
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+    -- ===================================================================
+    -- KEYMAPS LSP SIMPLES
+    -- ===================================================================
+    local on_attach = function(client, bufnr)
+      local opts = { buffer = bufnr, silent = true }
+
+      -- Navigation de base
+      vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+      vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+
+      -- Actions essentielles
+      vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+      vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+      vim.keymap.set("n", "<leader>f", function()
+        vim.lsp.buf.format({ async = true })
+      end, opts)
+
+      -- Diagnostics
+      vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+      vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+      vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
+
+      -- print("✅ LSP " .. client.name .. " connecté au buffer")
+    end
+
+    -- ===================================================================
+    -- CONFIGURATION DES SERVEURS LSP
+    -- ===================================================================
+
+    -- Lua (lua-language-server)
+    if enable_servers.lua then
+      lspconfig.lua_ls.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { "vim" },
+            },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+            telemetry = {
+              enable = false,
+            },
+          },
+        },
+      })
+    end
+
+    -- TypeScript/JavaScript (typescript-language-server)
+    if enable_servers.typescript then
+      lspconfig.ts_ls.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+      })
+    end
+
+    -- PHP (intelephense)
+    if enable_servers.php then
+      lspconfig.intelephense.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+      })
+    end
+
+    -- Rust (rust-analyzer)
+    if enable_servers.rust then
+      lspconfig.rust_analyzer.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+          ["rust-analyzer"] = {
+            cargo = {
+              allFeatures = true,
+            },
+            checkOnSave = {
+              command = "clippy",
+            },
+          },
+        },
+      })
+    end
+
+    -- Python (pyright)
+    if enable_servers.python then
+      lspconfig.pyright.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+      })
+    end
+
+    -- ===================================================================
+    -- DIAGNOSTICS BASIQUES
+    -- ===================================================================
+    vim.diagnostic.config({
+      virtual_text = true,
+      signs = true,
+      underline = true,
+      update_in_insert = false,
+    })
+
+    -- Icônes simples pour diagnostics
+    local signs = {
+      Error = "E",
+      Warn = "W",
+      Hint = "H",
+      Info = "I",
+    }
     for type, icon in pairs(signs) do
       local hl = "DiagnosticSign" .. type
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
     end
 
-    -- Configure LSP handlers
-    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-      border = "rounded",
-      width = 60,
+    -- ===================================================================
+    -- COMMANDES DE DIAGNOSTIC
+    -- ===================================================================
+    vim.api.nvim_create_user_command("LspStatus", function()
+      local clients = vim.lsp.get_active_clients()
+      if #clients == 0 then
+        -- print("❌ Aucun serveur LSP actif")
+        -- print("Ouvrez un fichier .lua, .js, .php, .rs ou .py")
+      else
+        -- print("✅ Serveurs LSP actifs:")
+        for _, client in pairs(clients) do
+          print("  - " .. client.name)
+        end
+      end
+    end, {})
+
+    vim.api.nvim_create_user_command("LspTest", function()
+      print("🧪 Test des serveurs LSP configurés:")
+      local servers = { "lua_ls", "ts_ls", "intelephense", "rust_analyzer", "pyright" }
+      for _, server in pairs(servers) do
+        local config = lspconfig[server]
+        -- if config then
+        --   print("  ✅ " .. server .. " - Configuré")
+        -- else
+        --  print("  ❌ " .. server .. " - Non configuré")
+        --end
+      end
+      print("")
+      print("💡 Conseil: Ouvrez un fichier du bon type pour activer le LSP")
+    end, {})
+
+    -- ===================================================================
+    -- AUTO-COMMANDE POUR VÉRIFIER LA CONNEXION LSP
+    -- ===================================================================
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+      callback = function(ev)
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        print("🎯 LSP " .. client.name .. " attaché au fichier " .. vim.fn.expand("%:t"))
+      end,
     })
 
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-      border = "rounded",
-      width = 60,
-    })
-
-    -- Custom commands
-    vim.api.nvim_create_user_command("LspRestart", function()
-      vim.cmd("LspStop")
-      vim.defer_fn(function()
-        vim.cmd("LspStart")
-      end, 500)
-    end, {})
-
-    vim.api.nvim_create_user_command("LspLog", function()
-      vim.cmd("edit " .. vim.lsp.get_log_path())
-    end, {})
-
-    vim.api.nvim_create_user_command("LspInfo", function()
-      vim.cmd("LspInfo")
-    end, {})
+    print("🚀 LSP configuré avec Mason! Ouvrez un fichier pour tester.")
   end,
 }

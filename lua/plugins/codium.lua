@@ -22,8 +22,8 @@ return {
           next = "<M-]>",
           prev = "<M-[>",
           dismiss = "<C-]>",
-        }
-      }
+        },
+      },
     })
   end,
 }

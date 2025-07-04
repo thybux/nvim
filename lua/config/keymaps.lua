@@ -11,17 +11,7 @@ vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
--- Raccourcis Neo-tree
-vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { silent = true })
-
 -- Charger la fonction de cycle de fenêtres
-local window_cycle = require("config.window-cycle")
-
--- Raccourci principal pour cycler entre les fenêtres
-vim.keymap.set("n", "<leader><tab>", window_cycle.cycle_windows, {
-  desc = "Cycle: Neo-tree → Éditeur → Terminal",
-  silent = true,
-})
 
 vim.keymap.set("n", "<Tab>", ":BufferLineCycleNext<CR>", {
   desc = "Onglet suivant",
@@ -88,3 +78,12 @@ end, { desc = "Toggle auto-format on save" })
 
 -- Voir les formatters disponibles
 vim.keymap.set("n", "<leader>mi", "<cmd>ConformInfo<cr>", { desc = "Info formatters" })
+
+vim.keymap.set("n", "<leader>bd", function()
+  local buffers = vim.fn.getbufinfo({ buflisted = 1 })
+  if #buffers > 1 then
+    vim.cmd("bd")
+  else
+    vim.cmd("q")
+  end
+end, { desc = "Close buffer or quit if last" })
