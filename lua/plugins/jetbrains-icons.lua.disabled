@@ -1,0 +1,242 @@
+return {
+  -- Configuration des icônes style JetBrains
+  {
+    "nvim-tree/nvim-web-devicons",
+    config = function()
+      require('nvim-web-devicons').setup({
+        -- Style JetBrains avec des lettres colorées
+        override = {
+          -- Files JavaScript/TypeScript avec lettres colorées
+          js = {
+            icon = "JS",
+            color = "#f7df1e", -- Jaune JavaScript officiel
+            cterm_color = "yellow",
+            name = "Javascript"
+          },
+          ts = {
+            icon = "TS", 
+            color = "#3178c6", -- Bleu TypeScript officiel
+            cterm_color = "blue",
+            name = "Typescript"
+          },
+          jsx = {
+            icon = "JSX",
+            color = "#61dafb", -- Cyan React
+            cterm_color = "cyan", 
+            name = "Jsx"
+          },
+          tsx = {
+            icon = "TSX",
+            color = "#61dafb",
+            cterm_color = "cyan",
+            name = "Tsx"
+          },
+          
+          -- Files avec style JetBrains
+          vue = {
+            icon = "VUE",
+            color = "#4FC08D",
+            cterm_color = "green",
+            name = "Vue"
+          },
+          json = {
+            icon = "JSON",
+            color = "#ffa500",
+            cterm_color = "yellow",
+            name = "Json"
+          },
+          lua = {
+            icon = "LUA",
+            color = "#000080",
+            cterm_color = "blue", 
+            name = "Lua"
+          },
+          py = {
+            icon = "PY",
+            color = "#3776ab",
+            cterm_color = "blue",
+            name = "Python"
+          },
+          rs = {
+            icon = "RS",
+            color = "#ce422b",
+            cterm_color = "red",
+            name = "Rust"
+          },
+          
+          -- Web files
+          html = {
+            icon = "HTML",
+            color = "#e34c26",
+            cterm_color = "red",
+            name = "Html"
+          },
+          css = {
+            icon = "CSS", 
+            color = "#1572B6",
+            cterm_color = "blue",
+            name = "Css"
+          },
+          scss = {
+            icon = "SCSS",
+            color = "#CF649A",
+            cterm_color = "magenta",
+            name = "Scss"
+          },
+          
+          -- Autres fichiers utiles
+          md = {
+            icon = "MD",
+            color = "#083fa1",
+            cterm_color = "blue",
+            name = "Markdown"
+          },
+          yml = {
+            icon = "YML",
+            color = "#cb171e",
+            cterm_color = "red", 
+            name = "Yaml"
+          },
+          yaml = {
+            icon = "YAML", 
+            color = "#cb171e",
+            cterm_color = "red",
+            name = "Yaml"
+          },
+          toml = {
+            icon = "TOML",
+            color = "#9c4221",
+            cterm_color = "red",
+            name = "Toml"
+          },
+          
+          -- Fichiers de config
+          env = {
+            icon = "ENV",
+            color = "#faf047",
+            cterm_color = "yellow",
+            name = "Env"
+          },
+          gitignore = {
+            icon = "GIT",
+            color = "#f1502f", 
+            cterm_color = "red",
+            name = "GitIgnore"
+          },
+          
+          -- Autres langages
+          go = {
+            icon = "GO",
+            color = "#00ADD8",
+            cterm_color = "cyan",
+            name = "Go"
+          },
+          java = {
+            icon = "JAVA",
+            color = "#ED8B00",
+            cterm_color = "yellow", 
+            name = "Java"
+          },
+          cpp = {
+            icon = "C++",
+            color = "#00599C",
+            cterm_color = "blue",
+            name = "Cpp"
+          },
+          c = {
+            icon = "C",
+            color = "#A8B9CC", 
+            cterm_color = "blue",
+            name = "C"
+          },
+        },
+        
+        -- Configuration par nom de fichier (style JetBrains)
+        override_by_filename = {
+          ["package.json"] = {
+            icon = "NPM",
+            color = "#cb3837",
+            cterm_color = "red",
+            name = "PackageJson"
+          },
+          ["tsconfig.json"] = {
+            icon = "TS",
+            color = "#3178c6", 
+            cterm_color = "blue",
+            name = "TsConfig"
+          },
+          ["webpack.config.js"] = {
+            icon = "WP",
+            color = "#8dd6f9",
+            cterm_color = "cyan",
+            name = "Webpack"
+          },
+          ["vite.config.js"] = {
+            icon = "VITE",
+            color = "#646cff",
+            cterm_color = "blue", 
+            name = "Vite"
+          },
+          ["tailwind.config.js"] = {
+            icon = "TW",
+            color = "#06b6d4",
+            cterm_color = "cyan",
+            name = "Tailwind"
+          },
+          [".eslintrc.js"] = {
+            icon = "ESL",
+            color = "#4b32c3",
+            cterm_color = "blue",
+            name = "Eslint"
+          },
+          ["prettier.config.js"] = {
+            icon = "PRET",
+            color = "#f7b93e",
+            cterm_color = "yellow",
+            name = "Prettier"
+          },
+          ["docker-compose.yml"] = {
+            icon = "DCR",
+            color = "#2496ed",
+            cterm_color = "blue",
+            name = "DockerCompose"
+          },
+          ["Dockerfile"] = {
+            icon = "DOC",
+            color = "#2496ed", 
+            cterm_color = "blue",
+            name = "Docker"
+          },
+          ["README.md"] = {
+            icon = "READ",
+            color = "#4d4d4d",
+            cterm_color = "grey", 
+            name = "Readme"
+          },
+          [".env"] = {
+            icon = "ENV",
+            color = "#faf047",
+            cterm_color = "yellow",
+            name = "DotEnv"
+          },
+          [".env.local"] = {
+            icon = "ENV",
+            color = "#faf047",
+            cterm_color = "yellow", 
+            name = "DotEnvLocal"
+          },
+          [".gitignore"] = {
+            icon = "GIT",
+            color = "#f1502f",
+            cterm_color = "red",
+            name = "GitIgnore"
+          },
+        },
+        
+        -- Couleur par défaut pour les fichiers inconnus
+        color_icons = true,
+        default = true,
+      })
+    end,
+  }
+}

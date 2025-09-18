@@ -1,5 +1,5 @@
 return {
-	"Exafunction/codeium.nvim",
+	"jcdickinson/codeium.nvim",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"hrsh7th/nvim-cmp",

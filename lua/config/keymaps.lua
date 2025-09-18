@@ -36,36 +36,31 @@ vim.keymap.set("n", "<leader>ce", ":Codeium Enable<CR>", { desc = "Activer Codei
 vim.keymap.set("n", "<leader>cd", ":Codeium Disable<CR>", { desc = "Désactiver Codeium" })
 vim.keymap.set("n", "<leader>ct", ":Codeium Toggle<CR>", { desc = "Basculer Codeium" })
 
+-- Formatage UNIQUEMENT MANUEL pour ne pas casser vos règles projet
+-- Utilisez <leader>mp pour formater manuellement si vraiment nécessaire
 vim.keymap.set({ "n", "v" }, "<leader>mp", function()
-	require("conform").format({
-		lsp_fallback = true,
-		async = false,
-		timeout_ms = 1000,
-	})
-end, { desc = "Formater le fichier ou la sélection" })
-
--- Formater et sauvegarder
-vim.keymap.set("n", "<leader>mf", function()
-	require("conform").format({ lsp_fallback = true })
-	vim.cmd("write")
-end, { desc = "Formater et sauvegarder" })
-
--- Activer/désactiver format on save
-vim.keymap.set("n", "<leader>mt", function()
-	local conform = require("conform")
-	if conform.will_fallback_lsp() then
-		conform.setup({ format_on_save = false })
-		print("🔴 Auto-format désactivé")
-	else
-		conform.setup({
-			format_on_save = {
-				timeout_ms = 500,
-				lsp_fallback = true,
-			},
+	local choice = vim.fn.confirm("Vraiment formater? (Attention aux règles du projet!)", "&Oui\n&Non", 2)
+	if choice == 1 then
+		require("conform").format({
+			lsp_fallback = true,
+			async = false,
+			timeout_ms = 1000,
 		})
-		print("🟢 Auto-format activé")
+		print("✅ Formaté manuellement")
+	else
+		print("❌ Formatage annulé")
 	end
-end, { desc = "Toggle auto-format on save" })
+end, { desc = "[MANUEL] Formater le fichier (demande confirmation)" })
+
+-- Sauvegarder SANS formater
+vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "Sauvegarder sans formater" })
+
+-- Info sur l'état du formatage
+vim.keymap.set("n", "<leader>mf", function()
+	print("🔴 Formatage automatique DÉSACTIVÉ")
+	print("Utilisez <leader>mp pour formater manuellement si nécessaire")
+	print("Utilisez <leader>w pour sauvegarder sans formater")
+end, { desc = "Info sur formatage" })
 
 -- Voir les formatters disponibles
 vim.keymap.set("n", "<leader>mi", "<cmd>ConformInfo<cr>", { desc = "Info formatters" })
@@ -78,3 +73,14 @@ vim.keymap.set("n", "<leader>bd", function()
 		vim.cmd("q")
 	end
 end, { desc = "Close buffer or quit if last" })
+
+-- Diagnostic pour problèmes de démarrage
+vim.keymap.set("n", "<leader>dd", function()
+	print("=== Diagnostic Neovim ===")
+	print("Plugins chargés:")
+	local plugins = require("lazy").stats()
+	print("  Total: " .. plugins.count)
+	print("  Chargés: " .. plugins.loaded)
+	print("Messages:")
+	vim.cmd("messages")
+end, { desc = "Diagnostic startup" })

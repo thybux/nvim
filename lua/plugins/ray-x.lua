@@ -70,7 +70,11 @@ return {
 					"<leader>ca",
 					vim.lsp.buf.code_action,
 					vim.tbl_extend("force", opts, { desc = "Actions de code" })
-				)([[-- Auto-format au save (optionnel)
+				)
+
+				-- Auto-format DÉSACTIVÉ pour respecter vos règles projet
+				-- NE PAS DÉCOMMENTER - Utilisez <leader>mp pour formater manuellement
+				--[[
 				if client.supports_method("textDocument/formatting") then
 					vim.api.nvim_create_autocmd("BufWritePre", {
 						buffer = bufnr,
@@ -78,35 +82,23 @@ return {
 							vim.lsp.buf.format({ async = false })
 						end,
 					})
-				end --]])
+				end
+				--]]
 			end
 
-			-- Configuration Volar (Vue.js)
+			-- Configuration Vue désactivée (Volar non installé)
+			-- Si vous développez en Vue.js, installez avec :
+			-- :MasonInstall vue-language-server
+			-- Puis décommentez :
+			--[[
 			require("lspconfig").volar.setup({
 				on_attach = on_attach,
 				capabilities = require("cmp_nvim_lsp").default_capabilities(),
-				filetypes = { "vue", "typescript", "javascript" },
-				init_options = {
-					vue = {
-						hybridMode = false,
-					},
-				},
+				filetypes = { "vue" },
 			})
+			--]]
 
-			-- Configuration ESLint
-			require("lspconfig").eslint.setup({
-				on_attach = function(client, bufnr)
-					on_attach(client, bufnr)
-					-- Auto-fix ESLint au save
-					vim.api.nvim_create_autocmd("BufWritePre", {
-						buffer = bufnr,
-						command = "EslintFixAll",
-					})
-				end,
-				settings = {
-					workingDirectory = { mode = "auto" },
-				},
-			})
+			-- ESLint est déjà configuré dans lsp.lua
 
 			-- Hover automatique après inactivité (optionnel)
 			vim.opt.updatetime = 1000 -- 1 seconde
@@ -122,12 +114,19 @@ return {
 				end,
 			})
 
-			-- Diagnostics configuration
+			-- Configuration des diagnostics unifiée
 			vim.diagnostic.config({
 				virtual_text = {
 					prefix = "●",
 				},
-				signs = true,
+				signs = {
+					text = {
+						[vim.diagnostic.severity.ERROR] = "✘ ",
+						[vim.diagnostic.severity.WARN] = "⚠ ",
+						[vim.diagnostic.severity.HINT] = "💡 ",
+						[vim.diagnostic.severity.INFO] = "ℹ ",
+					},
+				},
 				underline = true,
 				update_in_insert = false,
 				severity_sort = true,
@@ -136,13 +135,6 @@ return {
 					source = "always",
 				},
 			})
-
-			-- Icônes pour les diagnostics
-			local signs = { Error = "󰅚 ", Warn = "󰀪 ", Hint = "󰌶 ", Info = " " }
-			for type, icon in pairs(signs) do
-				local hl = "DiagnosticSign" .. type
-				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-			end
 		end,
 	},
 }

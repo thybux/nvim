@@ -1,0 +1,10 @@
+-- Si le problème de blocage au démarrage persiste avec Noice,
+-- renommez ce fichier en "noice.lua" et supprimez l'ancien noice.lua
+
+return {
+  -- Noice désactivé pour éviter les blocages
+  {
+    "folke/noice.nvim",
+    enabled = false,
+  },
+}

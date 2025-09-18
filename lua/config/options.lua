@@ -1,10 +1,6 @@
+-- Configuration générale de l'éditeur
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 2
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
-vim.opt.smartindent = true
 vim.opt.wrap = false
 vim.opt.swapfile = false
 vim.opt.backup = false
@@ -15,7 +11,9 @@ vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"
 vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
+vim.opt.clipboard = "unnamed"
 
+-- Configuration d'indentation (sans doublons)
 vim.opt.autoindent = true
 vim.opt.smartindent = true
 vim.opt.cindent = true
@@ -24,6 +22,10 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2
 vim.opt.shiftround = true
+
+-- Configuration pour l'affichage des icônes
+vim.opt.encoding = "utf-8"
+vim.opt.fileencoding = "utf-8"
 
 -- Indentation par type de fichier (override si nécessaire)
 vim.api.nvim_create_autocmd("FileType", {
