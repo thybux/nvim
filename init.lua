@@ -1,8 +1,5 @@
------------------------------------------------------------
--- init.lua — 100% monofichier
--- JS/TS + Go (optionnel), LSP, Treesitter, Telescope,
--- Git, Tests, Debug, Format (toggle), Copilot, jb.nvim,
--- et arborescence via neo-tree.
+----------------------------------------------------------
+-- init.lua — Fix coloration syntaxique
 -----------------------------------------------------------
 
 -- 0) Leaders AVANT tout
@@ -18,6 +15,7 @@ end
 
 -- 1) Options de base
 local o = vim.opt
+o.hidden = true
 o.termguicolors = true
 o.number = true
 o.relativenumber = true
@@ -35,7 +33,6 @@ o.scrolloff = 6
 o.list = true
 o.listchars = "tab:» ,trail:·,extends:…,precedes:…"
 
--- pas d’auto-format à l’enregistrement par défaut (toggle plus bas)
 vim.g.format_on_save = false
 
 -- 2) Keymaps de base
@@ -70,25 +67,57 @@ require("lazy").setup({
   { "numToStr/Comment.nvim", event = "VeryLazy", opts = {} },
   { "folke/todo-comments.nvim", event = "VeryLazy", opts = {} },
   { "folke/trouble.nvim", cmd = "Trouble", opts = {} },
+  { "famiu/bufdelete.nvim" },
 
   -- Thème JetBrains : jb.nvim + lualine thème 'jb'
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    opts = { options = { theme = "jb", globalstatus = true } }, -- thème fourni par jb.nvim
+    opts = { options = { theme = "jb", globalstatus = true } },
+  },
+	{ 
+    "echasnovski/mini.pairs", 
+    version = false, 
+    event = "InsertEnter",
+    opts = {
+      -- Modes où les autopairs sont actifs
+      modes = { insert = true, command = false, terminal = false },
+      -- Mappings basiques (éditables)
+      mappings = {
+        ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\].' },
+        ['['] = { action = 'open', pair = '[]', neigh_pattern = '[^\\].' },
+        ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\].' },
+        [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
+        [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
+        ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
+        ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\].', register = { cr = false } },
+        ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = '[^%a\\].', register = { cr = false } },
+        ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\].', register = { cr = false } },
+      },
+    }
   },
   {
     "nickkadutskyi/jb.nvim",
     lazy = false,
     priority = 1000,
-    opts = {}, -- ex: { transparent = true }
+    opts = {},
     config = function(_, opts)
       require("jb").setup(opts)
       vim.cmd("colorscheme jb")
+      
+      vim.api.nvim_create_autocmd({ "BufEnter", "ColorScheme" }, {
+        group = vim.api.nvim_create_augroup("JBThemeReapply", { clear = true }),
+        callback = function()
+          -- Réapplique seulement si le thème a changé
+          if vim.g.colors_name ~= "jb" then
+            vim.cmd("colorscheme jb")
+          end
+        end,
+      })
     end,
-  }, --  [oai_citation:2‡GitHub](https://github.com/nickkadutskyi/jb.nvim)
+  },
 
-  -- Arborescence (sidebar) : neo-tree (branche v3.x)
+  -- Arborescence (sidebar) : neo-tree
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
@@ -118,7 +147,7 @@ require("lazy").setup({
       },
       window = { width = 32, mappings = { ["<space>"] = "none" } },
     },
-  }, --  [oai_citation:3‡GitHub](https://github.com/nvim-neo-tree/neo-tree.nvim)
+  },
 
   -- Telescope
   {
@@ -148,40 +177,63 @@ require("lazy").setup({
 
   { "echasnovski/mini.surround", version = false, config = true },
 
-  { 
-	  "folke/flash.nvim", event = "VeryLazy", opts = {}, keys = {
-  { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash jump" },
-  { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash treesitter" },
-}, },
+  {
+    "folke/flash.nvim", event = "VeryLazy", opts = {}, keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash jump" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash treesitter" },
+    },
+  },
 
-  -- harpoon permet une navigation ultra rapide entre les fichiers
-  { "ThePrimeagen/harpoon", branch = "harpoon2", dependencies = { "nvim-lua/plenary.nvim" },
-	  config = function()
-	    local harpoon = require("harpoon")
-	    harpoon:setup()
+  -- harpoon
+  {
+    "ThePrimeagen/harpoon", 
+    branch = "harpoon2", 
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local harpoon = require("harpoon")
+      harpoon:setup()
 
-	    map("n", "<leader>a", function() harpoon:list():add() end, { desc = "Harpoon add file" })
-	    map("n", "<leader>h", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon menu" })
+      map("n", "<leader>a", function() harpoon:list():add() end, { desc = "Harpoon add file" })
+      map("n", "<leader>h", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon menu" })
 
-	    map("n", "<leader>1", function() harpoon:list():select(1) end)
-	    map("n", "<leader>2", function() harpoon:list():select(2) end)
-	    map("n", "<leader>3", function() harpoon:list():select(3) end)
-	    map("n", "<leader>4", function() harpoon:list():select(4) end)
-	  end
-	},
-  -- Treesitter
+      map("n", "<leader>1", function() harpoon:list():select(1) end)
+      map("n", "<leader>2", function() harpoon:list():select(2) end)
+      map("n", "<leader>3", function() harpoon:list():select(3) end)
+      map("n", "<leader>4", function() harpoon:list():select(4) end)
+    end
+  },
+
+  -- ✅ FIX: Treesitter avec rechargement du thème après
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
     opts = {
       ensure_installed = {
-        "lua","vim","vimdoc","regex","bash","markdown","json","yaml",
-        "tsx","typescript","javascript"-- "go","gomod"
+        "lua", "vim", "vimdoc", "regex", "bash", "markdown", "json", "yaml",
+        "tsx", "typescript", "javascript"
       },
-      highlight = { enable = true },
+      highlight = { 
+        enable = true,
+        -- ✅ Désactive temporairement pour les gros fichiers (performance)
+        disable = function(lang, buf)
+          local max_filesize = 100 * 1024 -- 100 KB
+          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          if ok and stats and stats.size > max_filesize then
+            return true
+          end
+        end,
+      },
       indent = { enable = true },
-    }
+    },
+    config = function(_, opts)
+      require("nvim-treesitter.configs").setup(opts)
+      
+      -- ✅ Réapplique le thème après le setup de Treesitter
+      vim.schedule(function()
+        vim.cmd("colorscheme jb")
+      end)
+    end,
   },
 
   -- Git
@@ -229,7 +281,6 @@ require("lazy").setup({
           { name = "luasnip" },
           { name = "path" },
           { name = "buffer" },
-          -- Copilot sera injecté plus bas si présent
         }),
         formatting = {
           format = function(entry, item)
@@ -242,13 +293,12 @@ require("lazy").setup({
     end,
   },
 
-  -- LSP (Mason + lspconfig; Go conditionnel)
+  -- LSP
   { "williamboman/mason.nvim", build = ":MasonUpdate", opts = { ui = { border = "rounded" } } },
   {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim" },
     opts = {
-      -- ensure_installed = { "vtsls", "eslint", "gopls", "lua_ls" },
       ensure_installed = { "vtsls", "eslint", "lua_ls" },
       automatic_installation = true,
     },
@@ -259,7 +309,6 @@ require("lazy").setup({
       local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- TS/JS via vtsls
       lspconfig.vtsls.setup({
         capabilities = capabilities,
         settings = {
@@ -268,19 +317,16 @@ require("lazy").setup({
         },
       })
 
-      -- ESLint (diagnostics + fixes ; pas de format)
       lspconfig.eslint.setup({
         capabilities = capabilities,
         settings = { workingDirectories = { mode = "auto" }, format = false, experimental = { useFlatConfig = true } },
       })
 
-      -- Lua
       lspconfig.lua_ls.setup({
         capabilities = capabilities,
         settings = { Lua = { diagnostics = { globals = { "vim" } } } },
       })
 
-      -- Go (seulement si gopls dispo)
       if mason_installed("gopls") or has("gopls") then
         lspconfig.gopls.setup({
           capabilities = capabilities,
@@ -288,7 +334,6 @@ require("lazy").setup({
         })
       end
 
-      -- Keymaps LSP + diagnostics UI
       map("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
       map("n", "gD", vim.lsp.buf.declaration, { desc = "Go to declaration" })
       map("n", "gi", vim.lsp.buf.implementation, { desc = "Go to implementation" })
@@ -307,7 +352,7 @@ require("lazy").setup({
     end
   },
 
-  -- Format (off by default; toggle <leader>tf)
+  -- Format
   {
     "stevearc/conform.nvim",
     event = "BufReadPre",
@@ -342,7 +387,7 @@ require("lazy").setup({
     end
   },
 
-  -- Go utils (chargés seulement si 'go' existe)
+  -- Go utils
   {
     "ray-x/go.nvim",
     ft = { "go", "gomod", "gowork", "gotmpl" },
@@ -356,7 +401,7 @@ require("lazy").setup({
     end,
   },
 
-  -- DAP (debug) + UI + Mason auto (js/go conditionnels)
+  -- DAP
   { "mfussenegger/nvim-dap", lazy = true },
   {
     "rcarriga/nvim-dap-ui",
@@ -380,7 +425,7 @@ require("lazy").setup({
     end,
   },
 
-  -- Tests (neotest) — nvim-nio requis, neotest-go si Go dispo
+  -- Tests
   {
     "nvim-neotest/neotest",
     dependencies = (function()
@@ -401,7 +446,7 @@ require("lazy").setup({
     end,
   },
 
-  -- IA: Copilot (ghost text, sans chat)
+  -- Copilot
   {
     "zbirenbaum/copilot.lua",
     event = "InsertEnter",
@@ -425,18 +470,11 @@ require("lazy").setup({
 -- Raccourcis restants
 map("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Diagnostics (Trouble)" })
 
-
------------------------------------------------------------
--- 🔁  Navigation améliorée : buffers + fenêtres/neo-tree
------------------------------------------------------------
-
--- 1️⃣  Navigation entre buffers (Tab / Shift+Tab)
---   - seulement en mode NORMAL
---   - <Tab> = buffer suivant, <S-Tab> = buffer précédent
+-- Navigation buffers
 map("n", "<Tab>", "<cmd>bnext<CR>", { silent = true, desc = "Buffer suivant" })
 map("n", "<S-Tab>", "<cmd>bprevious<CR>", { silent = true, desc = "Buffer précédent" })
 
--- 2️⃣  Rotation du focus entre fenêtres et arborescence (leader+Tab)
+-- Rotation fenêtres
 local function cycle_windows()
   local wins = vim.api.nvim_tabpage_list_wins(0)
   if #wins <= 1 then return end
@@ -445,7 +483,6 @@ local function cycle_windows()
   local next_win
   local found_current = false
 
-  -- cherche la fenêtre suivante dans la liste
   for _, w in ipairs(wins) do
     if found_current then
       next_win = w
@@ -455,16 +492,12 @@ local function cycle_windows()
       found_current = true
     end
   end
-  -- si on est à la fin, boucle sur la première
   if not next_win then next_win = wins[1] end
 
   vim.api.nvim_set_current_win(next_win)
 end
 
--- 3️⃣  Détection spéciale pour inclure/exclure la fenêtre Neo-tree
---     (si l'arborescence n'est pas ouverte, la rotation ne change rien)
 map("n", "<leader><Tab>", function()
-  -- récupère toutes les fenêtres visibles
   local wins = vim.api.nvim_tabpage_list_wins(0)
   local valid_wins = {}
   local has_neotree = false
@@ -479,39 +512,312 @@ map("n", "<leader><Tab>", function()
   end
 
   if #valid_wins <= 1 then
-    return -- rien à faire
+    return
   end
 
-  -- si neo-tree est ouvert, on fait une rotation simple
   if has_neotree then
     cycle_windows()
   else
-    -- pas d'arborescence, même cycle classique
     cycle_windows()
   end
 end, { silent = true, desc = "Cycle entre code et arborescence" })
 
------------------------------------------------------------
--- 🧩 :Q comportement intelligent
------------------------------------------------------------
-vim.api.nvim_create_user_command("Qsmart", function()
-  local wins = vim.api.nvim_tabpage_list_wins(0)
-  if #wins > 1 then
-    -- si c'est Neo-tree, on le ferme juste
-    local buf = vim.api.nvim_win_get_buf(0)
-    local ft = vim.api.nvim_buf_get_option(buf, "filetype")
-    if ft == "neo-tree" then
-      vim.cmd("Neotree close")
-      return
-    end
-    -- sinon, ferme juste ce split
-    vim.cmd("close")
-  else
-    -- dernière fenêtre → quitte Neovim
-    vim.cmd("qall")
-  end
-end, { desc = "Quit intelligemment" })
+vim.keymap.set("n", "<leader>x", "<cmd>Bdelete<cr>", { desc = "Fermer le buffer courant (soft)" })
+vim.keymap.set("n", "<leader>X", "<cmd>Bdelete!<cr>", { desc = "Fermer le buffer courant (!)" })
+vim.cmd([[
+  cabbrev <expr> bd (getcmdtype()==':' && getcmdline()=='bd') ? 'Bdelete' : 'bd'
+]])
 
--- remapper :q et <leader>q
-vim.cmd([[cabbrev q Qsmart]])
-map("n", "<leader>q", "<cmd>Qsmart<cr>", { desc = "Quit intelligently" })
+
+
+
+
+
+
+
+
+--[[
+═══════════════════════════════════════════════════════════════════════════════
+                           📦 INVENTAIRE DES PLUGINS
+═══════════════════════════════════════════════════════════════════════════════
+
+🔧 GESTIONNAIRE DE PLUGINS
+──────────────────────────────────────────────────────────────────────────────
+  • folke/lazy.nvim
+    └─ Gestionnaire de plugins moderne et performant
+    └─ Lazy loading automatique, UI intégrée, profiling
+    └─ https://github.com/folke/lazy.nvim
+
+📚 CORE / BIBLIOTHÈQUES
+──────────────────────────────────────────────────────────────────────────────
+  • nvim-lua/plenary.nvim
+    └─ Bibliothèque Lua pour Neovim (fonctions utilitaires)
+    └─ Requis par: Telescope, Harpoon, Gitsigns, Neotest
+
+  • nvim-tree/nvim-web-devicons
+    └─ Icônes pour fichiers et dossiers
+    └─ Requis par: Neo-tree, Bufferline, Telescope
+
+  • MunifTanjim/nui.nvim
+    └─ Composants UI pour Neovim (popups, inputs)
+    └─ Requis par: Neo-tree
+
+🎨 THÈME & UI
+──────────────────────────────────────────────────────────────────────────────
+  • nickkadutskyi/jb.nvim
+    └─ Thème JetBrains (IntelliJ IDEA style)
+    └─ Priority: 1000 (charge en premier)
+    └─ https://github.com/nickkadutskyi/jb.nvim
+
+  • nvim-lualine/lualine.nvim
+    └─ Statusline élégante et configurable
+    └─ Theme: 'jb' (fourni par jb.nvim)
+
+  • akinsho/bufferline.nvim
+    └─ Tabline pour gérer les buffers visuellement
+    └─ Keymaps: <Tab> (next), <S-Tab> (prev)
+
+  • folke/which-key.nvim
+    └─ Popup de suggestions pour les keymaps
+    └─ Affiche automatiquement après <leader>
+
+🗂️ NAVIGATION & RECHERCHE
+──────────────────────────────────────────────────────────────────────────────
+  • nvim-neo-tree/neo-tree.nvim (v3.x)
+    └─ Explorateur de fichiers en sidebar
+    └─ Keymaps: <leader>e (toggle), <leader>o (focus)
+    └─ Features: Git status, diagnostics, follow current file
+
+  • nvim-telescope/telescope.nvim
+    └─ Fuzzy finder puissant (fichiers, grep, buffers)
+    └─ Keymaps:
+       <leader>ff → Find files
+       <leader>fg → Live grep
+       <leader>fb → Buffers
+       <leader>fh → Help tags
+
+  • ThePrimeagen/harpoon (v2)
+    └─ Navigation ultra-rapide entre fichiers favoris
+    └─ Keymaps:
+       <leader>a → Ajouter fichier
+       <leader>h → Menu Harpoon
+       <leader>1-4 → Accès direct fichiers 1-4
+
+  • folke/flash.nvim
+    └─ Navigation rapide dans le buffer (jump to char/treesitter)
+    └─ Keymaps:
+       s → Flash jump
+       S → Flash treesitter
+
+✏️ ÉDITION & MANIPULATION
+──────────────────────────────────────────────────────────────────────────────
+  • echasnovski/mini.pairs
+    └─ Auto-pairs intelligent pour (), [], {}, "", ''
+    └─ Modes: insert only, respecte l'échappement
+
+  • echasnovski/mini.surround
+    └─ Manipulation de "surroundings" (parenthèses, quotes)
+    └─ Ex: sa" → surround add ", sd" → surround delete "
+
+  • numToStr/Comment.nvim
+    └─ Commentaire intelligent (respect la syntaxe)
+    └─ Keymaps: gcc (ligne), gc (motion), gbc (block)
+
+  • famiu/bufdelete.nvim
+    └─ Fermer buffers sans casser les fenêtres
+    └─ Keymaps: <leader>x (soft), <leader>X (force)
+    └─ Alias: :bd → :Bdelete
+
+🌳 SYNTAX & PARSING
+──────────────────────────────────────────────────────────────────────────────
+  • nvim-treesitter/nvim-treesitter
+    └─ Parser syntaxique moderne (AST-based highlighting)
+    └─ Langages: lua, vim, js, ts, tsx, json, yaml, markdown
+    └─ Features: highlight, indent, disable pour gros fichiers (>100KB)
+
+🔧 LSP (Language Server Protocol)
+──────────────────────────────────────────────────────────────────────────────
+  • williamboman/mason.nvim
+    └─ Gestionnaire d'outils LSP/DAP/Linters/Formatters
+    └─ UI: :Mason
+
+  • williamboman/mason-lspconfig.nvim
+    └─ Bridge entre Mason et nvim-lspconfig
+    └─ Auto-install: vtsls, eslint, lua_ls, gopls (si Go dispo)
+
+  • neovim/nvim-lspconfig
+    └─ Configuration LSP servers
+    └─ Servers actifs:
+       - vtsls (TypeScript/JavaScript)
+       - eslint (Linting JS/TS)
+       - lua_ls (Lua)
+       - gopls (Go, conditionnel)
+    └─ Keymaps:
+       gd → Definition
+       gD → Declaration
+       gi → Implementation
+       gr → References (Telescope)
+       K → Hover doc
+       <leader>rn → Rename
+       <leader>ca → Code action
+       [d / ]d → Diagnostic prev/next
+
+💬 COMPLÉTION
+──────────────────────────────────────────────────────────────────────────────
+  • hrsh7th/nvim-cmp
+    └─ Moteur de complétion extensible
+    └─ Keymaps:
+       <C-Space> → Trigger complétion
+       <CR> → Confirm
+       <Tab> → Next item / expand snippet
+       <S-Tab> → Prev item
+
+  • hrsh7th/cmp-nvim-lsp
+    └─ Source: LSP
+
+  • hrsh7th/cmp-buffer
+    └─ Source: Mots du buffer courant
+
+  • hrsh7th/cmp-path
+    └─ Source: Chemins fichiers
+
+  • L3MON4D3/LuaSnip
+    └─ Moteur de snippets
+
+  • saadparwaiz1/cmp_luasnip
+    └─ Intégration LuaSnip → nvim-cmp
+
+  • rafamadriz/friendly-snippets
+    └─ Collection de snippets prêts à l'emploi
+
+🎨 FORMATTING
+──────────────────────────────────────────────────────────────────────────────
+  • stevearc/conform.nvim
+    └─ Formatage multi-formatters avec fallback
+    └─ Formatters (par langage):
+       JS/TS: prettierd → prettier → biome
+       JSON: biome → jq → prettier
+       Go: gofumpt + goimports-reviser + golines
+       Lua: stylua
+    └─ Keymaps:
+       <leader>f → Format buffer
+       <leader>tf → Toggle format on save (OFF par défaut)
+
+🐙 GIT
+──────────────────────────────────────────────────────────────────────────────
+  • lewis6991/gitsigns.nvim
+    └─ Indicateurs Git dans la gutter (added/modified/deleted)
+    └─ Hunk navigation, blame inline
+
+  • NeogitOrg/neogit
+    └─ Interface Git inspirée de Magit (Emacs)
+    └─ Keymaps: <leader>gs → Ouvrir Neogit
+
+  • folke/todo-comments.nvim
+    └─ Highlight et recherche des TODOs/FIXMEs/NOTEs
+    └─ Ex: TODO:, HACK:, WARN:, PERF:, NOTE:, FIX:
+
+🐛 DEBUG (DAP - Debug Adapter Protocol)
+──────────────────────────────────────────────────────────────────────────────
+  • mfussenegger/nvim-dap
+    └─ Client DAP pour debugging
+
+  • rcarriga/nvim-dap-ui
+    └─ UI pour DAP (breakpoints, variables, stack)
+    └─ Auto-open/close sur debug start/stop
+
+  • jay-babu/mason-nvim-dap.nvim
+    └─ Auto-install adapters DAP via Mason
+    └─ Adapters: js (Node.js), delve (Go, si dispo)
+
+🧪 TESTS
+──────────────────────────────────────────────────────────────────────────────
+  • nvim-neotest/neotest
+    └─ Framework de tests unifié
+    └─ Keymaps:
+       <leader>tt → Test nearest
+       <leader>tF → Test file
+       <leader>to → Test output
+
+  • nvim-neotest/nvim-nio
+    └─ Bibliothèque async I/O (requis par neotest)
+
+  • haydenmeade/neotest-jest
+    └─ Adapter Jest pour neotest
+
+  • nvim-neotest/neotest-go
+    └─ Adapter Go testing (si Go disponible)
+
+🤖 IA / COPILOT
+──────────────────────────────────────────────────────────────────────────────
+  • zbirenbaum/copilot.lua
+    └─ GitHub Copilot en Lua pur (ghost text)
+    └─ Auto-trigger activé en mode insert
+
+  • zbirenbaum/copilot-cmp
+    └─ Intégration Copilot → nvim-cmp
+    └─ Suggestions dans le menu de complétion
+
+🛠️ UTILITAIRES
+──────────────────────────────────────────────────────────────────────────────
+  • folke/trouble.nvim
+    └─ Panneau diagnostics/quickfix élégant
+    └─ Keymaps: <leader>xx → Toggle diagnostics
+
+🐹 GO (Conditionnel - si `go` disponible)
+──────────────────────────────────────────────────────────────────────────────
+  • ray-x/go.nvim
+    └─ Utilitaires Go (impl interface, tags, tests)
+    └─ Keymaps:
+       <leader>gi → GoImpl (implement interface)
+       <leader>ga → GoAddTag (add struct tags)
+
+  • ray-x/guihua.lua
+    └─ Dépendance pour go.nvim (UI components)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        🔑 KEYMAPS PRINCIPAUX (RÉSUMÉ)
+═══════════════════════════════════════════════════════════════════════════════
+
+GÉNÉRAL
+  <leader>w       → Save
+  <leader>q       → Quit
+  <leader>h       → Clear highlights
+  <Tab>           → Buffer suivant
+  <S-Tab>         → Buffer précédent
+  <leader><Tab>   → Cycle fenêtres
+  <leader>x       → Close buffer (soft)
+  <leader>X       → Close buffer (force)
+
+FICHIERS & NAVIGATION
+  <leader>e       → Toggle Neo-tree
+  <leader>o       → Focus Neo-tree
+  <leader>ff      → Find files
+  <leader>fg      → Live grep
+  <leader>fb      → Buffers
+  <leader>a       → Harpoon add
+  <leader>h       → Harpoon menu
+  <leader>1-4     → Harpoon select
+  s / S           → Flash jump
+
+LSP
+  gd              → Definition
+  gr              → References
+  K               → Hover
+  <leader>rn      → Rename
+  <leader>ca      → Code action
+  [d / ]d         → Diagnostic navigation
+
+FORMAT & GIT
+  <leader>f       → Format
+  <leader>tf      → Toggle format on save
+  <leader>gs      → Neogit
+
+DEBUG & TEST
+  <leader>tt      → Test nearest
+  <leader>tF      → Test file
+  <leader>xx      → Trouble diagnostics
+
+═══════════════════════════════════════════════════════════════════════════════
+]]
